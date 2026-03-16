@@ -7,11 +7,11 @@ Build a modern AI-powered QR code generator SaaS inspired by qrcode-ai.com. The 
 **Tagline:** "Forge stunning QR codes with AI"
 
 ## Tech Stack (STRICT - do not deviate)
-- **Framework:** Next.js 14+ (App Router)
+- **Framework:** Next.js 15 (latest, App Router)
 - **Language:** TypeScript (strict mode)
 - **Styling:** Tailwind CSS + shadcn/ui components
 - **Database:** PostgreSQL with Prisma ORM
-- **Auth:** NextAuth.js (Google + GitHub + email/password)
+- **Auth:** Better Auth (email + password authentication)
 - **Payments:** Stripe (subscriptions)
 - **Storage:** MinIO (S3-compatible) for QR code images
 - **QR Generation:** `qrcode` npm package for base QR + canvas manipulation
@@ -93,12 +93,8 @@ src/
 ## Environment Variables Needed
 ```
 DATABASE_URL=postgresql://qrforge:qrforge@localhost:5433/qrforge
-NEXTAUTH_SECRET=
-NEXTAUTH_URL=http://localhost:3000
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-GITHUB_ID=
-GITHUB_SECRET=
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=http://localhost:3000
 STRIPE_SECRET_KEY=
 STRIPE_PUBLISHABLE_KEY=
 STRIPE_WEBHOOK_SECRET=
@@ -116,6 +112,19 @@ REPLICATE_API_TOKEN=
 - `npm run build` - Production build
 - `npm test` - Run tests
 
+## CRITICAL: Auth Migration Required
+The project currently uses NextAuth (next-auth). This MUST be replaced with Better Auth (better-auth npm package).
+- Remove all next-auth, @auth/prisma-adapter, @auth/core dependencies
+- Install `better-auth` package
+- Configure Better Auth with email+password authentication in `src/lib/auth.ts`
+- Update Prisma schema to match Better Auth's required tables (user, session, account, verification)
+- Update all auth-related API routes, middleware, and components
+- Remove `src/types/next-auth.d.ts`
+- Remove `src/app/api/auth/[...nextauth]/` route
+- Create Better Auth API route at `src/app/api/auth/[...all]/route.ts`
+- Update session provider and navbar to use Better Auth client
+- See https://www.better-auth.com/docs for documentation
+
 ## Important Notes
 - Use server components where possible, client components only when needed
 - All API routes should validate input with zod
@@ -123,3 +132,4 @@ REPLICATE_API_TOKEN=
 - Implement rate limiting on public endpoints
 - QR code scanning endpoint must be fast (redirect endpoint)
 - Store QR images in MinIO, serve via signed URLs
+- Commit changes after completing each major feature
